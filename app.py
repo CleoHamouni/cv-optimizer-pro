@@ -53,3 +53,49 @@ if st.button("🚀 Lancer l'Analyse du Matching"):
                     resume_text = ""
                     for page in pdf.pages:
                         text = page.extract_text()
+                        if text:
+                            resume_text += text
+
+                # 2. Préparation de la requête OpenAI
+                client = openai.OpenAI(api_key=api_key)
+                
+                prompt = f"""
+                Tu es un expert en recrutement (Talent Acquisition). 
+                Analyse de manière critique le matching entre ce CV et cette annonce.
+                
+                DESCRIPTION DU POSTE:
+                {job_desc}
+                
+                TEXTE DU CV:
+                {resume_text}
+                
+                Fournis un rapport structuré avec :
+                - SCORE DE MATCHING : Un score sur 100.
+                - POINTS FORTS : Liste les 3 points clés où le candidat brille.
+                - POINTS FAIBLES / MANQUANTS : Ce qui manque par rapport à l'annonce.
+                - CONSEILS D'OPTIMISATION : 3 conseils concrets pour adapter ce CV au poste.
+                """
+
+                # 3. Appel à l'IA (Modèle GPT-4o pour la précision)
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[{"role": "system", "content": "Tu es un assistant expert en recrutement."},
+                              {"role": "user", "content": prompt}],
+                    temperature=0.7
+                )
+
+                # 4. Affichage des résultats
+                analysis = response.choices[0].message.content
+                st.success("✅ Analyse terminée avec succès !")
+                st.markdown("### 📊 Résultat de l'IA")
+                st.markdown(analysis)
+                
+                # Option de téléchargement
+                st.download_button("📥 Télécharger l'analyse", analysis, file_name="matching_cv.txt")
+
+            except Exception as e:
+                st.error(f"Une erreur est survenue lors de l'analyse : {str(e)}")
+
+# --- PIED DE PAGE ---
+st.divider()
+st.caption("CV Optimizer Pro | Outil d'aide à la décision Staffing")
