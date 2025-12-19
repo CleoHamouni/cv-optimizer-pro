@@ -1,76 +1,55 @@
 import streamlit as st
 import openai
 import pdfplumber
+import pandas as pd
 
-st.set_page_config(page_title="CV Optimizer Pro", page_icon="🎯")
+st.set_page_config(page_title="CV Optimizer Pro", page_icon="🎯", layout="wide")
+
+# --- STYLE CSS ---
+st.markdown("""
+    <style>
+    .main { background-color: #f5f7f9; }
+    .stButton>button { width: 100%; border-radius: 5px; height: 3em; background-color: #FF4B4B; color: white; }
+    .status-box { padding: 20px; border-radius: 10px; border: 1px solid #e6e9ef; background-color: white; }
+    </style>
+    """, unsafe_allow_html=True)
 
 # --- INTERFACE ---
 st.title("🎯 CV Optimizer Pro")
-st.subheader("Analyse de matching IA pour Staffing & Recrutement")
+st.write("Analyse de matching IA pour le Staffing et le Recrutement")
 
-# Configuration de la clé API (à mettre dans tes Secrets Streamlit)
-api_key = st.sidebar.text_input("Clé API OpenAI", type="password")
+# Barre latérale pour la configuration
+with st.sidebar:
+    st.title("⚙️ Configuration")
+    api_key = st.text_input("Clé API OpenAI", type="password", help="Entre ta clé sk-...")
+    st.info("Cette clé est nécessaire pour générer l'analyse.")
 
-with st.expander("ℹ️ Instructions"):
-    st.write("1. Entre ta clé OpenAI. 2. Colle l'annonce. 3. Upload le CV (PDF).")
-
-# --- INPUTS ---
+# --- ZONE DE SAISIE ---
 col1, col2 = st.columns(2)
+
 with col1:
-    job_desc = st.text_area("📄 Description du Poste", height=250, placeholder="Colle l'annonce ici...")
+    st.subheader("1. L'Annonce")
+    job_desc = st.text_area("Colle la description du poste ici :", height=300, placeholder="Recherche Business Developer avec 3 ans d'expérience...")
 
 with col2:
-    uploaded_file = st.file_uploader("📂 Upload CV (PDF)", type="pdf")
+    st.subheader("2. Le CV")
+    uploaded_file = st.file_uploader("Upload le CV (format PDF uniquement)", type="pdf")
 
-# --- LOGIQUE D'ANALYSE ---
-if st.button("🚀 Lancer l'Optimisation"):
+st.divider()
+
+# --- TRAITEMENT ---
+if st.button("🚀 Lancer l'Analyse du Matching"):
     if not api_key:
-        st.error("L'IA a besoin de ta clé API pour travailler !")
-    elif not job_desc or not uploaded_file:
-        st.warning("Merci de fournir une annonce ET un CV.")
+        st.error("❌ Erreur : Tu dois entrer ta clé API OpenAI dans la barre latérale.")
+    elif not job_desc:
+        st.warning("⚠️ Attention : Colle une description de poste.")
+    elif not uploaded_file:
+        st.warning("⚠️ Attention : Upload un fichier PDF.")
     else:
-        with st.spinner("L'IA analyse le matching..."):
+        with st.spinner("L'IA analyse le CV par rapport à l'annonce..."):
             try:
-                # 1. Lecture du PDF
+                # 1. Extraction du texte du PDF
                 with pdfplumber.open(uploaded_file) as pdf:
                     resume_text = ""
                     for page in pdf.pages:
-                        resume_text += page.extract_text()
-
-                # 2. Appel OpenAI (Sans cache persistant pour éviter les bugs)
-                client = openai.OpenAI(api_key=api_key)
-                
-                prompt = f"""
-                Tu es un expert en recrutement et staffing. 
-                Analyse le matching entre ce CV et cette annonce.
-                
-                ANNONCE: {job_desc}
-                CV: {resume_text}
-                
-                Donne une réponse structurée :
-                1. Score de matching (X/100)
-                2. Points forts du candidat pour ce poste
-                3. Compétences ou mots-clés manquants
-                4. Recommandations pour adapter le CV (Staffing)
-                """
-
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.7
-                )
-
-                # 3. Affichage du résultat
-                result = response.choices[0].message.content
-                st.success("✅ Analyse terminée !")
-                st.markdown("---")
-                st.markdown(result)
-                
-                # Bouton pour télécharger le compte-rendu
-                st.download_button("📥 Télécharger l'analyse", result, file_name="analyse_matching.txt")
-
-            except Exception as e:
-                st.error(f"Une erreur est survenue : {e}")
-
-st.divider()
-st.caption("Propulsé par GPT-4o - Spécial Staffing & Recrutement")
+                        text = page.extract_text()
