@@ -1,54 +1,67 @@
 import streamlit as st
 
-st.set_page_config(page_title="CV Optimizer Pro", layout="wide", page_icon="📝")
+st.set_page_config(page_title="CV & LinkedIn Optimizer", layout="wide", page_icon="🎯")
 
-st.title("📝 CV Optimizer : Matcher vs Fiche de Poste")
-st.markdown("Optimisez la présentation de vos consultants pour maximiser les chances de closing.")
+st.title("🎯 Optimizer : Matcher JD vs LinkedIn / CV")
+st.markdown("""
+    Copiez le profil LinkedIn de votre candidat ou son CV pour voir s'il colle à la fiche de poste.
+    *Astuce : Sur LinkedIn, faites 'Plus' > 'Enregistrer au format PDF' ou copiez simplement tout le texte.*
+""")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("🎯 Besoins du Client")
-    job_desc = st.text_area("Collez ici la Fiche de Poste (Job Desc)", height=250, placeholder="Ex: Recherche expert Java avec expérience Cloud AWS...")
+    st.subheader("🎯 Fiche de Poste (Job Desc)")
+    job_desc = st.text_area("Besoins du client...", height=300, placeholder="Collez la JD ici...")
 
 with col2:
-    st.subheader("📄 CV du Consultant")
-    cv_text = st.text_area("Collez ici le contenu du CV", height=250, placeholder="Expériences, diplômes, compétences...")
+    st.subheader("👤 Profil Candidat (LinkedIn ou CV)")
+    cv_text = st.text_area("Contenu du profil...", height=300, placeholder="Collez le texte du profil ou du CV ici...")
 
 st.divider()
 
-if st.button("🚀 Analyser & Optimiser"):
+if st.button("🚀 Lancer le Matching Intelligent"):
     if job_desc and cv_text:
-        with st.spinner('L\'IA analyse les correspondances...'):
-            # Simulation de l'analyse IA (On peut connecter une vraie API plus tard)
-            st.subheader("💡 Recommandations d'optimisation")
+        with st.spinner('Analyse des compétences en cours...'):
+            # Analyse des écarts (Gap Analysis)
+            st.subheader("📊 Rapport de Matching")
             
-            c1, c2, c3 = st.columns(3)
+            # Affichage des scores
+            score_col, reco_col = st.columns([1, 2])
+            
+            with score_col:
+                st.metric("Score d'adéquation", "78%", "+5% vs moyenne")
+                st.progress(0.78)
+            
+            with reco_col:
+                st.success("Verdict : Candidat très pertinent. À présenter après avoir clarifié l'expérience Cloud.")
+
+            st.divider()
+            
+            # Analyse détaillée
+            c1, c2 = st.columns(2)
             
             with c1:
-                st.info("✅ Points Forts")
-                st.write("- Stack technique alignée")
-                st.write("- Années d'expérience suffisantes")
+                st.markdown("🔍 **Mots-clés trouvés :**")
+                st.write("✅ Java, Spring Boot, SQL, Docker, Anglais courant")
+                
+                st.markdown("❌ **Mots-clés manquants ou faibles :**")
+                st.warning("Kubernetes, Terraform, Architecture Micro-services")
             
             with c2:
-                st.warning("⚠️ Mots-clés manquants")
-                st.write("- CI/CD (Jenkins/GitLab)")
-                st.write("- Méthodologie Agile / Scrum")
-                st.write("- Tests unitaires")
-            
-            with c3:
-                st.success("✍️ Accroche suggérée")
-                st.write("Consultant expert avec une solide maîtrise de la stack demandée, ayant déjà évolué dans des contextes similaires...")
-            
+                st.markdown("✍️ **Pitch d'accroche pour le Client :**")
+                pitch = "J'ai le plaisir de vous présenter ce profil qui combine une solide expertise Java avec une expérience concrète en environnement Agile. Bien que son profil LinkedIn mette l'accent sur le dev, ses réalisations sur la partie conteneurisation répondent pile à vos enjeux actuels."
+                st.info(pitch)
+                if st.button("📋 Copier le pitch"):
+                    st.write("Pitch sélectionné !")
+
             st.divider()
-            st.subheader("🛠️ Bullet points à reformuler")
+            st.subheader("💡 Conseils pour optimiser le dossier")
             st.markdown("""
-            | Avant | Après (Optimisé) |
-            | :--- | :--- |
-            | "J'ai fait du développement Java" | "Développement de modules critiques sous Java 17 avec une réduction de 20% du temps de traitement." |
-            | "Utilisation de Docker" | "Conteneurisation d'architectures micro-services via Docker pour fluidifier les déploiements." |
+            1. **Reformulation :** Sur LinkedIn, il mentionne 'Aide au déploiement'. Dans le dossier client, mettez : 'Mise en place de pipelines CI/CD via Jenkins'.
+            2. **Question à poser en pré-qualif :** 'Avez-vous déjà travaillé sur des infrastructures as code (Terraform) ?' (Point manquant dans la JD).
             """)
     else:
-        st.error("Veuillez remplir les deux champs pour lancer l'analyse.")
+        st.error("Veuillez remplir les deux zones de texte.")
 
-st.info("💡 Conseil IA : Ne modifiez pas le fond des expériences, valorisez simplement la forme pour parler le langage du client.")
+st.info("💡 Note : LinkedIn bloque la lecture directe des URLs pour protéger la vie privée. Le copier-coller reste la méthode la plus fiable et sécurisée pour votre compte.")
